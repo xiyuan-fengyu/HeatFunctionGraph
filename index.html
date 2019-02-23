@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Love Forever</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        #myCanvas {
+            position: relative;
+            display: block;
+            margin: 0 auto;
+        }
+        #exp {
+            display: none;
+            position: relative;
+            margin-top: -100px;
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <canvas id="myCanvas" width="600" height="600"></canvas>
+        <p id="exp"></p>
+    </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+<script>
+    const canvas = $("#myCanvas")[0];
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const graph = (fun, config) => {
+        const xScale = (width / (config.right - config.left));
+        const yScale = (width / (config.top - config.bottom));
+        ctx.clearRect(0, 0, width, height);
+        ctx.beginPath();
+        let first = true;
+        for (let x = config.xMin; x < config.xMax; x += config.xStep) {
+            const xPos = (x - config.left) * xScale;
+            let yPos = fun(x);
+            if (!isNaN(yPos)) {
+                yPos = height - ((yPos  - config.bottom) * yScale);
+                if (first) {
+                    ctx.moveTo(xPos, yPos);
+                    first = false;
+                }
+                else {
+                    ctx.lineTo(xPos, yPos);
+                }
+            }
+            else {
+                first = true;
+            }
+        }
+
+        ctx.lineCap="round";
+        ctx.lineJoin="round";
+        ctx.strokeStyle = "#ff899f";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+    };
+
+    const heihtS = 0.918;
+    const widthS = 6.01;
+    const maxX = Math.pow(widthS, 0.5);
+
+    $("#exp").text(`$$f(x) = {x ^ {2 / 3} + ${heihtS} * (${widthS} - x ^ 2) ^ {1 / 2} * sin(${13.14.toFixed(2)} * \\pi * x)}$$`);
+
+    const update = intensive => {
+        graph(x => {
+            return Math.pow(x * x, 1 / 3) + heihtS * Math.pow(widthS - x * x, 0.5) * Math.sin(intensive * Math.PI * x);
+        }, {
+            left: -4,
+            right: 4,
+            top: 4,
+            bottom: -4,
+            xMin: -maxX,
+            xMax: maxX,
+            xStep: 0.001
+        });
+        $("#MJXc-Node-42 span").text(intensive.toFixed(2));
+    };
+
+    let curIntensive = 0.00;
+    const updateFrame = () => {
+        curIntensive = curIntensive + 0.06;
+        update(curIntensive);
+        if (curIntensive < 13.14) {
+            setTimeout(updateFrame, 1000 / 60 * (1 + curIntensive / 13.14));
+        }
+    };
+    setTimeout(() => {
+        $("#exp").fadeIn();
+        updateFrame();
+    }, 100);
+</script>
+</html>
